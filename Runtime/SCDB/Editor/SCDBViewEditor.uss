@@ -1,0 +1,7 @@
+.dbListElement-label {
+    flex-grow: 1;
+}
+
+DBListElement {
+    flex-direction: row;
+}

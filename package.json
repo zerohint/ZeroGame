@@ -1,0 +1,16 @@
+{
+	"name": "com.redellion",
+	"displayName": "Redellion",
+	"version": "0.0.1",
+	"description": "Useful classes, data structures, extension methods etc.",
+	"dependencies": {
+		"com.unity.inputsystem": ">=1.7.0"
+	},
+	"documentationUrl": "https://studios.redellion.com/contact/",
+	"unity": "2021.3",
+	"author": {
+		"name": "Redellion",
+		"email": "hi@redellion.com",
+		"url": "https://studios.redellion.com/"
+	}
+}

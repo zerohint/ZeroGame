@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/1_Components/Utilities/SCDB/Editor/SCDBViewEditor.uss?fileID=7433441132597879392&amp;guid=bdbd2b6966a1c864f94780f0fe46a74f&amp;type=3#SCDBViewEditor" />
+    <ui:VisualElement name="root-view" style="flex-grow: 1;">
+        <uie:Toolbar>
+            <uie:ToolbarMenu tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" text="All" />
+            <uie:ToolbarSearchField />
+        </uie:Toolbar>
+        <TheKiwiCoder.SplitView fixed-pane-initial-dimension="480" style="min-height: 300px;">
+            <ui:VisualElement name="left-panel" style="flex-grow: 1;">
+                <Illumate.DBView style="flex-grow: 1;">
+                    <ui:Label tabindex="-1" text="Database" parse-escape-sequences="true" display-tooltip-when-elided="true" name="db-title" style="background-color: rgb(37, 37, 37);" />
+                    <uie:Toolbar style="background-color: rgb(88, 88, 88);">
+                        <uie:ToolbarButton text="Name" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ToolbarButton" class="dbListElement-label" />
+                        <uie:ToolbarButton text="Type" parse-escape-sequences="true" display-tooltip-when-elided="true" class="dbListElement-label" />
+                    </uie:Toolbar>
+                    <ui:ListView style="flex-grow: 1;" />
+                </Illumate.DBView>
+            </ui:VisualElement>
+            <ui:VisualElement name="right-panel" style="flex-basis: auto;">
+                <ui:Label tabindex="-1" text="Inspector" parse-escape-sequences="true" display-tooltip-when-elided="true" style="background-color: rgb(37, 37, 37);" />
+                <Illumate.InspectorView style="flex-grow: 1;" />
+                <ui:Label tabindex="-1" text="SCDB Version 0.1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="version-text" style="-unity-text-align: upper-right; color: rgb(123, 123, 123);" />
+            </ui:VisualElement>
+        </TheKiwiCoder.SplitView>
+    </ui:VisualElement>
+</ui:UXML>
