@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Redellion
+namespace ZeroGame
 {
     // TODO: SCDBSC should be internal
     [CreateAssetMenu(fileName = "SCDB", menuName = "Redellion/SCDB")]

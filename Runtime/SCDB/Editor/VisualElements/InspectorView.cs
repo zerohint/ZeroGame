@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Redellion
+namespace ZeroGame
 {
     public class InspectorView : VisualElement
     {

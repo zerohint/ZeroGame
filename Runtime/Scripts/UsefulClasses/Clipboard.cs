@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Redellion
+namespace ZeroGame
 {
     /// <summary>
     /// All platforms clipboard access.

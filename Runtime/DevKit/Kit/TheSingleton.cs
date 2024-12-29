@@ -1,17 +1,13 @@
 using UnityEngine;
 
-namespace Redellion.DevKit
+namespace ZeroGame
 {
     /// <summary>
     /// Singleton scene instance for the DevKit
     /// </summary>
-    public class DevKitSingleton : MonoBehaviour
+    public class TheSingleton : MonoBehaviour
     {
-        public static DevKitSingleton Instance { get; private set; }
-
-        // HERE
-        //[Header("References")]
-        //public Modals modals;
+        public static TheSingleton Instance { get; private set; }
 
         private void Awake()
         {
@@ -25,5 +21,7 @@ namespace Redellion.DevKit
                 Destroy(gameObject);
             }
         }
+
+
     }
 }

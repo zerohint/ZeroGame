@@ -8,7 +8,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.UIElements;
 using System.Linq;
 
-namespace Redellion.Editor
+namespace ZeroGame.Editor
 {
     [InitializeOnLoad]
     public static class ToolbarUtilities

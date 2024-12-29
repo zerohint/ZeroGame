@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.UIElements;
 
-namespace Redellion
+namespace ZeroGame
 {
     public class DBView : VisualElement
     {
