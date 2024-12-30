@@ -3,7 +3,7 @@ using System;
 /// <summary>
 /// Small extensions
 /// </summary>
-public static class RedellionCustomExtensions
+public static class ZeroGameCustomExtensions
 {
     /// <summary>
     /// Remap number from range to a range

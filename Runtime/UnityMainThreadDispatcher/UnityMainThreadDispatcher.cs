@@ -3,22 +3,18 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class UnityMainThreadDispatcher : MonoBehaviour
+internal class UnityMainThreadDispatcher : MonoBehaviour
 {
     private static readonly Queue<Action> _executionQueue = new();
     private static UnityMainThreadDispatcher _instance;
     private static Thread _mainThread;
 
-    /// <summary>
-    /// DEBUG: Instancing not working on side threads also. So we need to call Instance() from main thread.
-    /// </summary>
-    /// <returns></returns>
     public static UnityMainThreadDispatcher Instance()
     {
         if (_instance == null)
         {
-            _instance = new GameObject("MainThreadDispatcher").AddComponent<UnityMainThreadDispatcher>();
-            DontDestroyOnLoad(_instance.gameObject);
+            _instance = new GameObject("UnityMainThreadDispatcher").AddComponent<UnityMainThreadDispatcher>();
+            _instance.transform.parent = TheSingleton.Instance.transform;
         }
         return _instance;
     }

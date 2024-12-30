@@ -13,7 +13,7 @@ namespace UnityEngine
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<T>();
+                    _instance = FindFirstObjectByType<T>();
 
                 return _instance;
             }
@@ -39,7 +39,7 @@ namespace UnityEngine
             get
             {
                 if (_instance == null)
-                    _instance = FindObjectOfType<T>();
+                    _instance = FindFirstObjectByType<T>();
 
                 if (_instance == null)
                 {

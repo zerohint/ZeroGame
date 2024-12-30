@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Illumate.Helper
+namespace ZeroGame.QuickComponents
 {
-    [AddComponentMenu("Illumate Helpers/Keyboard Event")]
+    [AddComponentMenu("Quick Components/Keyboard Event")]
     public class KeyboardEvent : MonoBehaviour
     {
         [SerializeField] private KeyCode KeyboardButton = KeyCode.S;

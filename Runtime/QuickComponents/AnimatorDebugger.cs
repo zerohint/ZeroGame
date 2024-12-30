@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Illumate.Helper
+namespace ZeroGame.QuickComponents
 {
-    [AddComponentMenu("Illumate Helpers/Animator Debugger")]
+    [AddComponentMenu("Quick Components/Animator Debugger")]
     public class AnimatorDebugger : MonoBehaviour
     {
         [SerializeField] private Transform[] boneTransforms = new Transform[HUMANOID_BONE_COUNT];
