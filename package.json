@@ -1,16 +1,17 @@
 {
-	"name": "com.zerogame",
-	"displayName": "ZeroGame",
-	"version": "0.0.1",
-	"description": "Useful classes, data structures, extension methods etc.",
-	"dependencies": {
-		"com.unity.inputsystem": ">=1.7.0"
-	},
-	"documentationUrl": "https://zerohint.com/contact/",
-	"unity": "2021.3",
-	"author": {
-		"name": "ZeroHint",
-		"email": "hi@zerohint.com",
-		"url": "https://zerohint.com/"
-	}
+  "name": "com.zerogame",
+  "displayName": "ZeroGame",
+  "version": "0.0.1",
+  "description": "Useful classes, data structures, extension methods etc.",
+  "dependencies": {
+    "com.unity.inputsystem": ">=1.7.0",
+    "com.unity.textmeshpro": ">=3.0.0"
+  },
+  "documentationUrl": "https://zerohint.com/contact/",
+  "unity": "2021.3",
+  "author": {
+    "name": "ZeroHint",
+    "email": "hi@zerohint.com",
+    "url": "https://zerohint.com/"
+  }
 }

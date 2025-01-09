@@ -4,9 +4,11 @@ public sealed class TheSingleton : MonoBehaviour
 {
     public static TheSingleton Instance { get; private set; }
 
+    [SerializeField] private RectTransform uiParent;
+    [Space]
     [SerializeField] private SingletonSCNonGeneric[] managers;
-    [SerializeField] private GameObject[] singletonUI;
-    [SerializeField] private GameObject[] gameObjects;
+    [SerializeField] private MonoSingletonSerializable[] singletonUI;
+    [SerializeField] private MonoSingletonSerializable[] gameObjects;
 
     private void Awake()
     {
@@ -20,9 +22,9 @@ public sealed class TheSingleton : MonoBehaviour
             Destroy(gameObject);
         }
 
-        foreach (var manager in managers) manager.Initialize();
-        foreach (var ui in singletonUI) Instantiate(ui);
-        foreach (var gameObject in gameObjects) Instantiate(gameObject);
+        foreach (var manager in managers) manager.Initialize(); // TODO: createinstance
+        for (int i = 0; i < singletonUI.Length; i++) singletonUI[i] = Instantiate(singletonUI[i], uiParent);
+        for (int i = 0; i < gameObjects.Length; i++) gameObjects[i] = Instantiate(gameObjects[i], uiParent);
     }
 
 
@@ -33,10 +35,29 @@ public sealed class TheSingleton : MonoBehaviour
     /// <returns></returns>
     public static T GetManager<T>() where T : SingletonSC<T>
     {
-        Debug.Assert(Instance != null, "TheSingleton instance not found. Did you reached at awake?");
+        Debug.Assert(Instance != null, $"TheSingleton instance not found. Did you reached at awake? (Tried to reach: {typeof(T)})");
 
         foreach (var manager in Instance.managers)
             if (manager is T t)
+                return t;
+        return null;
+    }
+
+
+    /// <summary>
+    /// Get singleton by type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static T GetSingleton<T>() where T : MonoSingleton<T>
+    {
+        Debug.Assert(Instance != null, $"TheSingleton instance not found. Did you reached at awake? (Tried to reach: {typeof(T)})");
+
+        foreach (var s in Instance.singletonUI)
+            if (s is T t)
+                return t;
+        foreach (var s in Instance.gameObjects)
+            if (s is T t)
                 return t;
         return null;
     }

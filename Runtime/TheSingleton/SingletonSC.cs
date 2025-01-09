@@ -9,6 +9,7 @@ using UnityEngine;
 public abstract class SingletonSC<T> : SingletonSCNonGeneric where T : SingletonSC<T>
 {
     public static T Instance => TheSingleton.GetManager<T>();
+    protected void StartCoroutine(System.Collections.IEnumerator enumerator) => TheSingleton.Instance.StartCoroutine(enumerator);
 }
 
 /// <summary>
