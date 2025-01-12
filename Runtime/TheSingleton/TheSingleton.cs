@@ -20,6 +20,7 @@ public sealed class TheSingleton : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
 
         foreach (var manager in managers) manager.Initialize(); // TODO: createinstance
