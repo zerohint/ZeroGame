@@ -2,7 +2,8 @@ namespace ZeroGame
 {
     public static class RootCheck
     {
-#if UNITY_ANDROID
+        // not done
+#if false && UNITY_ANDROID
         public static bool IsDeviceRooted() => CheckSuBinary() || CheckRootManagementApps() || CheckCommonRootFiles();
 
 
