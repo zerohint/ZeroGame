@@ -2,9 +2,10 @@ mergeInto(LibraryManager.library, {
   /*MessageToWeb: function (message, param) {
     window["GetMessageFromUnity"](UTF8ToString(message), UTF8ToString(param));
   },*/
+  
   CloseBrowserTab: function () {
 	window.close();
-  }
+  },
 
   CopyToWebClipboard: function (text) {
     if(navigator.clipboard)
