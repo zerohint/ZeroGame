@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ZeroGame
 {
     // TODO: SCDBSC should be internal
-    [CreateAssetMenu(fileName = "SCDB", menuName = "Redellion/SCDB")]
+    [CreateAssetMenu(fileName = "SCDB", menuName = "ZeroGame/SCDB")]
     public class SCDBSC : ScriptableObject
     {
         private const string FILE_NAME = "SCDB";

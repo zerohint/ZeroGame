@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(-1000)]
 public sealed class TheSingleton : MonoBehaviour
 {
     public static TheSingleton Instance { get; private set; }
