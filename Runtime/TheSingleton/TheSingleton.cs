@@ -3,7 +3,18 @@ using UnityEngine;
 [DefaultExecutionOrder(-1000)]
 public sealed class TheSingleton : MonoBehaviour
 {
-    public static TheSingleton Instance { get; private set; }
+    private static TheSingleton _instance;
+    public static TheSingleton Instance {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindFirstObjectByType<TheSingleton>();
+                _instance.Initialize();
+            }
+            return _instance;
+        }
+    }
 
     [SerializeField] private RectTransform uiParent;
     [Space]
@@ -13,17 +24,13 @@ public sealed class TheSingleton : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != this)
+            Destroy(this.gameObject);
+    }
 
+    private void Initialize()
+    {
+        DontDestroyOnLoad(gameObject);
         foreach (var manager in managers) manager.Initialize(); // TODO: createinstance
         for (int i = 0; i < singletonUI.Length; i++) singletonUI[i] = Instantiate(singletonUI[i], uiParent);
         for (int i = 0; i < gameObjects.Length; i++) gameObjects[i] = Instantiate(gameObjects[i], uiParent);
