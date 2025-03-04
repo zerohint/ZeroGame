@@ -28,6 +28,14 @@ namespace ZeroGame
                 if (sc is T t && (selector == null || selector(t)))
                     yield return t;
         }
+
+        public static void Add<T>(T data) where T : ScriptableObject
+        {
+            if (!SCDBSC.Instance.scriptables.Contains(data))
+            {
+                SCDBSC.Instance.scriptables.Add(data);
+            }
+        }
     }
 }
 
