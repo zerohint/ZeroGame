@@ -4,7 +4,7 @@ using UnityEngine;
 /// Singleton structure with instance caching
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class MonoInstance<T> : MonoBehaviour where T : MonoSingleton<T>
+public abstract class MonoInstance<T> : MonoBehaviour where T : MonoInstance<T>
 {
     private static volatile T _instance = null;
 
