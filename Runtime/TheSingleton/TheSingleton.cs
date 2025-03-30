@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[DefaultExecutionOrder(-1000)]
+
 public sealed class TheSingleton : MonoBehaviour
 {
     private static TheSingleton _instance;
@@ -10,6 +10,13 @@ public sealed class TheSingleton : MonoBehaviour
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<TheSingleton>();
+#if UNITY_EDITOR
+                // Instance couldn't created by the TheSingletonManager before the call so create one
+                //if ( _instance == null)
+                //{
+                //    thesingletonmaan
+                //}
+#endif
                 _instance.Initialize();
             }
             return _instance;

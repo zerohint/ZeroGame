@@ -5,8 +5,10 @@ namespace ZeroGame
 {
     /// <summary>
     /// Ensures TheSingleton is exists
+    /// TODO: add on build
     /// </summary>
     [InitializeOnLoad]
+    [DefaultExecutionOrder(-1000)]
     internal static class TheSingletonManager
     {
         private const string ASSET_PATH_IN_PROJECT = "Assets/ZeroGame/TheSingleton.prefab";
@@ -26,18 +28,28 @@ namespace ZeroGame
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
 
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void CreateTheSingleton()
+        {
+            if (theSingletonInstance.IsExists()) return;
+            theSingletonInstance = GameObject.Instantiate(GetAsset());
+            theSingletonInstance.name = "TheSingleton";
+        }
+
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (state == PlayModeStateChange.EnteredPlayMode)
-            {
-                theSingletonInstance = GameObject.Instantiate(GetAsset());
-                theSingletonInstance.name = "TheSingleton";
-            }
-            else if (state == PlayModeStateChange.ExitingPlayMode)
+            //if (state == PlayModeStateChange.EnteredPlayMode)
+            //{
+            //    CreateTheSingleton();
+            //}
+            if (state == PlayModeStateChange.ExitingPlayMode)
             {
                 Object.DestroyImmediate(theSingletonInstance.gameObject);
             }
         }
+
+
 
         /// <summary>
         /// Get or create TheSingleton prefab

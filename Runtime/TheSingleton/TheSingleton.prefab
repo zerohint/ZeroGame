@@ -46,8 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c288e6cc7600b548bb0d6818a0d0713, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiParent: {fileID: 5020044598202072113}
   managers:
   - {fileID: 11400000, guid: e3346a304bfee2248a4e41225512326b, type: 2}
+  singletonUI: []
   gameObjects: []
 --- !u!1 &4929310483202687723
 GameObject:
@@ -228,4 +230,3 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
-  m_ScrollDeltaPerTick: 6
