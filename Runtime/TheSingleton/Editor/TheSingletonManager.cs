@@ -39,10 +39,6 @@ namespace ZeroGame
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            //if (state == PlayModeStateChange.EnteredPlayMode)
-            //{
-            //    CreateTheSingleton();
-            //}
             if (state == PlayModeStateChange.ExitingPlayMode)
             {
                 Object.DestroyImmediate(theSingletonInstance.gameObject);
