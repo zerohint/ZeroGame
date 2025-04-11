@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public static class DebugExtensions
 {
@@ -55,15 +56,15 @@ public static class DebugExtensions
 #if UNITY_2021_3_24
     [HideInCallstack]
 #endif
-    public static void Print<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+    public static void Print<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, string debugText = "")
     {
         if (dictionary == null)
         {
-            UnityEngine.Debug.Log("Null dictionary: " + dictionary);
+            UnityEngine.Debug.Log(debugText + " Null dictionary: " + dictionary);
             return;
         }
 
-        string ret = "Array with length: " + dictionary.Count + "\n";
+        string ret = debugText + " Array with length: " + dictionary.Count + "\n";
         foreach (var kv in dictionary)
         {
             ret += kv.Key + ": " + kv.Value + "\n";

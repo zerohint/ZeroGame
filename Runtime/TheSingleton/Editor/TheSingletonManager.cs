@@ -41,7 +41,8 @@ namespace ZeroGame
         {
             if (state == PlayModeStateChange.ExitingPlayMode)
             {
-                Object.DestroyImmediate(theSingletonInstance.gameObject);
+                if(theSingletonInstance.IsExists())
+                    Object.DestroyImmediate(theSingletonInstance.gameObject);
             }
         }
 
