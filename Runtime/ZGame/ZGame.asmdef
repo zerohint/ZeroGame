@@ -1,0 +1,16 @@
+{
+    "name": "ZGame",
+    "rootNamespace": "",
+    "references": [
+        "GUID:92c8664b253270c4faf1d7608baeeda8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
