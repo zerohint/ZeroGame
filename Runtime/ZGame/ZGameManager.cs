@@ -7,7 +7,7 @@ namespace ZeroGame
     [CreateAssetMenu(fileName = "ZGame Manager", menuName = "ZeroGame/ZGame Manager")]
     public class ZGameManager : SingletonSC<ZGameManager>
     {
-        [Header("Firebase")]
+        //[Header("Firebase")]
         [field:SerializeField] public string ApiKey { get; private set; }
         [field: SerializeField] public string ProjectId { get; private set; }
         [field: SerializeField] public string AppId { get; private set; }
