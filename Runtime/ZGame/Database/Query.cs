@@ -90,7 +90,7 @@ namespace ZeroGame.DB
 
         private IEnumerator RunQueryCR(string collection, Dictionary<string, object> structuredQuery, Action<DBResponse> onComplete)
         {
-            string url = $"{ZGameManager.BASE_URL}projects/{ZGameManager.Instance.ProjectId}/databases/(default)/documents:runQuery?key={ZGameManager.Instance.ApiKey}";
+            string url = $"{ZGame.Config.BASE_URL}projects/{ZGame.Instance.config.ProjectId}/databases/(default)/documents:runQuery?key={ZGame.Instance.config.ApiKey}";
 
             var body = new Dictionary<string, object>
             {

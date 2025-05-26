@@ -58,7 +58,7 @@ namespace ZeroGame.DB
 
             IEnumerator SendRequestCR(string path, Method method, Dictionary<string, object> jsonData, Action<DBResponse> OnComplete)
             {
-                string url = $"{ZGameManager.BASE_URL}projects/{ZGameManager.Instance.ProjectId}/databases/(default)/documents/{path}?key={ZGameManager.Instance.ApiKey}";
+                string url = $"{ZGame.Config.BASE_URL}projects/{ZGame.Instance.config.ProjectId}/databases/(default)/documents/{path}?key={ZGame.Instance.config.ApiKey}";
                 Debug("Url: " + url);
                 using UnityWebRequest request = method switch
                 {

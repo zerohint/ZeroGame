@@ -237,7 +237,7 @@ public class AuthManager : SystemBase
         string jsonPayload = JsonConvert.SerializeObject(requestData);
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
 
-        string signInUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={ZGameManager.Instance.ApiKey}";
+        string signInUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={ZGame.Instance.config.ApiKey}";
         using UnityWebRequest request = new(signInUrl, "POST");
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
@@ -288,7 +288,7 @@ public class AuthManager : SystemBase
         string jsonPayload = JsonConvert.SerializeObject(requestData);
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
 
-        string signUpUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={ZGameManager.Instance.ApiKey}";
+        string signUpUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={ZGame.Instance.config.ApiKey}";
         using UnityWebRequest request = new(signUpUrl, "POST");
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();

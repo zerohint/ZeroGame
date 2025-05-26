@@ -3,11 +3,13 @@ using UnityEngine.Networking;
 
 namespace ZeroGame
 {
-    [CreateAssetMenu(fileName = "ZGameManager", menuName = "Game/Managers/ZGameManager")]
+    [CreateAssetMenu(fileName = "ZGame Manager", menuName = "ZeroGame/ZGame Manager")]
     public class ZGame : SingletonSC<ZGame>
     {
+
         public static AuthManager Auth => Instance._auth;
-        public static DB.DB DB => Instance._db;        
+        public static DB.DB DB => Instance._db;
+        [field:SerializeField] public Config config { get; private set; }
 
 
 
@@ -19,6 +21,30 @@ namespace ZeroGame
             base.Initialize();
             _auth = new();
             _db = new ();
+        }
+
+        private void OnValidate()
+        {
+            config.OnValidate();
+        }
+
+
+
+        [System.Serializable]
+        public class Config
+        {
+            [field: SerializeField] public string ApiKey { get; private set; }
+            [field: SerializeField] public string ProjectId { get; private set; }
+            [field: SerializeField] public string AppId { get; private set; }
+            public string AuthDomain => $"{ProjectId}.firebaseapp.com";
+            public const string BASE_URL = "https://firestore.googleapis.com/v1/";
+
+            public void OnValidate()
+            {
+                ApiKey = ApiKey?.Trim();
+                ProjectId = ProjectId?.Trim();
+                AppId = AppId?.Trim();
+            }
         }
     }
 
