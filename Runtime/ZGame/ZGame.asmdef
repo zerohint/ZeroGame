@@ -1,6 +1,6 @@
 {
     "name": "ZGame",
-    "rootNamespace": "",
+    "rootNamespace": "ZeroGame",
     "references": [
         "GUID:92c8664b253270c4faf1d7608baeeda8"
     ],
