@@ -292,7 +292,8 @@ namespace ZeroGame
             var type = obj.GetType();
 
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
             foreach (var field in fields)
             {
                 try
@@ -306,7 +307,24 @@ namespace ZeroGame
                 }
             }
 
+            foreach (var property in properties)
+            {
+                if (!property.CanRead)
+                    continue;
+
+                try
+                {
+                    object value = property.GetValue(obj);
+                    dictionary[property.Name] = value;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] Property '{property.Name}': {ex.Message}");
+                }
+            }
+
             return dictionary;
         }
+
     }
 }
