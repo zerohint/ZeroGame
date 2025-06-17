@@ -13,39 +13,47 @@ namespace ZeroGame.DB
 
         public string name;
         public Dictionary<string, object> fields = null;
+        public Dictionary<string, object> properties = null;
         public DateTime createTime;
         public DateTime updateTime;
 
-        public Dictionary<string, object> ToDictionary()
+        private void ProcessDictionary(Dictionary<string, object> source, Dictionary<string, object> result)
         {
-            // TODO: also can be used: FirestoreHelper.ConvertFromFirestoreJson
-            if (fields == null)
-                return new Dictionary<string, object>();
-
-            var result = new Dictionary<string, object>();
-
-            foreach (var field in fields)
+            foreach (var item in source)
             {
-                var fieldData = JObject.FromObject(field.Value).ToObject<Dictionary<string, object>>();
-                var enumerator = fieldData.GetEnumerator();
+                var data = JObject.FromObject(item.Value).ToObject<Dictionary<string, object>>();
+                var enumerator = data.GetEnumerator();
                 enumerator.MoveNext();
 
                 string valueType = enumerator.Current.Key;
                 object value = enumerator.Current.Value;
 
-                result[field.Key] = FirestoreHelper.NameToType(valueType, value);
+                result[item.Key] = FirestoreHelper.NameToType(valueType, value);
             }
+        }
+
+        public Dictionary<string, object> ToDictionary()
+        {
+            if (fields == null && properties == null)
+                return new Dictionary<string, object>();
+
+            var result = new Dictionary<string, object>();
+
+            if (fields != null)
+                ProcessDictionary(fields, result);
+
+            if (properties != null)
+                ProcessDictionary(properties, result);
 
             return result;
         }
 
         public object GetValue(string key, Type targetType)
         {
-            if (!ContainsField(key))
-                throw new KeyNotFoundException($"Field '{key}' not found in document");
+            if (!ContainsKey(key))
+                throw new KeyNotFoundException($"Field or property '{key}' not found in document");
 
-            // Handle both JObject and direct Dictionary cases
-            var fieldValue = fields[key];
+            var fieldValue = fields?.ContainsKey(key) == true ? fields[key] : properties[key];
             Dictionary<string, object> fieldData;
 
             if (fieldValue is JObject jObj)
@@ -55,49 +63,59 @@ namespace ZeroGame.DB
             else
                 throw new InvalidCastException($"Unexpected field type: {fieldValue.GetType()}");
 
-            // Get the first (and only) key-value pair
             var kvp = fieldData.First();
             return FirestoreHelper.NameToType(kvp.Key, kvp.Value, targetType);
         }
 
         public T GetValue<T>(string key) => (T)GetValue(key, typeof(T));
 
-
         public bool TryParse<T>(out T result) where T : new()
         {
             result = default;
-            if (fields == null)
+            if (fields == null && properties == null)
                 return false;
 
             result = new T();
-            var fieldsInType = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance);
-            
-            foreach (var field in fieldsInType)
+            var members = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Instance)
+                                   .Cast<MemberInfo>()
+                                   .Concat(typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance));
+
+            foreach (var member in members)
             {
-                if(field.Name == "DocumentId")
+                if (member.Name == "DocumentId")
                 {
-                    field.SetValue(result, Id);
+                    if (member is FieldInfo field)
+                        field.SetValue(result, Id);
+                    else if (member is PropertyInfo property && property.CanWrite)
+                        property.SetValue(result, Id);
+
                     continue;
                 }
 
-                if (ContainsField(field.Name))
+                if (ContainsKey(member.Name))
                 {
-                    object value = GetValue(field.Name, field.FieldType);
-                    //Debug.Log($"{field.Name}: {field.FieldType} and return is " + (value == null ? "null" : value.GetType()));
-                    field.SetValue(result, value);
+                    object value = GetValue(member.Name, member is FieldInfo fieldInfo ? fieldInfo.FieldType : ((PropertyInfo)member).PropertyType);
+
+                    if (member is FieldInfo field)
+                        field.SetValue(result, value);
+                    else if (member is PropertyInfo property && property.CanWrite)
+                        property.SetValue(result, value);
                 }
                 else
-                    Debug.LogWarning($"Field {field.Name} not found in Document");
+                    Debug.LogWarning($"Field or property {member.Name} not found in Document");
             }
 
-            return true; // Success
+            return true;
         }
 
-        public bool ContainsField(string field) => fields != null && fields.ContainsKey(field);
+        public bool ContainsKey(string key) =>
+            (fields != null && fields.ContainsKey(key)) || (properties != null && properties.ContainsKey(key));
 
         public override string ToString()
         {
-            return $"{GetType()} ({name}) Field count: {fields.Count}";
+            int fieldCount = fields?.Count ?? 0;
+            int propertyCount = properties?.Count ?? 0;
+            return $"{GetType()} ({name}) Field count: {fieldCount}, Property count: {propertyCount}";
         }
     }
 }

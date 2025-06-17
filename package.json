@@ -1,7 +1,7 @@
 {
   "name": "com.zerogame",
   "displayName": "ZeroGame",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Useful classes, data structures, extension methods, db connection etc.",
   "dependencies": {
     "com.unity.inputsystem": ">=1.7.0",

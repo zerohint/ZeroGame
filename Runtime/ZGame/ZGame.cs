@@ -9,6 +9,8 @@ namespace ZeroGame
 
         public static AuthManager Auth => Instance._auth;
         public static DB.DB DB => Instance._db;
+
+        [Tooltip("Add your Firebase configuration here. You can find it by creating web app.")]
         [field:SerializeField] public Config config { get; private set; }
 
 
