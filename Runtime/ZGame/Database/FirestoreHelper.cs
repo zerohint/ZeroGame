@@ -198,24 +198,26 @@ namespace ZeroGame
 
             static DateTime HandleTimestampValue(string timestampString)
             {
-                // Parse the timestamp
                 DateTime dateTime;
 
-                // First try parsing with timezone (if present)
+                // 1. ISO 8601
                 if (DateTime.TryParse(timestampString, CultureInfo.InvariantCulture,
-                                    DateTimeStyles.RoundtripKind, out dateTime))
+                                      DateTimeStyles.RoundtripKind, out dateTime))
                 {
-                    // Ensure it's in UTC format (ends with Z)
                     if (dateTime.Kind == DateTimeKind.Unspecified)
-                    {
                         dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
-                    }
                     return dateTime.ToUniversalTime();
                 }
 
-                // Fallback for other formats (add your specific format if needed)
+                // 2. Last dance
+                if (DateTime.TryParseExact(timestampString, "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture,
+                                          DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out dateTime))
+                {
+                    return dateTime;
+                }
+
                 throw new FormatException($"Invalid timestamp format: {timestampString}. " +
-                                       "Timestamps must be in ISO 8601 format with timezone (e.g., '2023-01-01T00:00:00Z')");
+                                        "Timestamps must be in ISO 8601 format with timezone (e.g., '2023-01-01T00:00:00Z')");
             }
 
             static object HandleGeoPointValue(object value)
