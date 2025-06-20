@@ -12,7 +12,7 @@ public class AuthManager : SystemBase
     public Action OnLoginSucces;
 
 
-    public const string SALT = "ezhelderdo";
+    public const string SALT = "authRequest";
 
     public Status status = new();
     
