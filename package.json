@@ -1,12 +1,12 @@
 {
   "name": "com.zerogame",
   "displayName": "ZeroGame",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Useful classes, data structures, extension methods, db connection etc.",
   "dependencies": {
-    "com.unity.inputsystem": ">=1.7.0",
-    "com.unity.textmeshpro": ">=3.0.0",
-	"com.unity.nuget.newtonsoft-json": ">=3.0.0"
+	"com.unity.inputsystem": "1.7.0",
+	"com.unity.textmeshpro": "3.0.6",
+	"com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "documentationUrl": "https://zerohint.com/contact/",
   "unity": "2021.3",
