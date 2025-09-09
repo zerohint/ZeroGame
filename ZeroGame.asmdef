@@ -10,7 +10,8 @@
         "iOS",
         "LinuxStandalone64",
         "WebGL",
-        "WindowsStandalone32"
+        "WindowsStandalone32",
+		"WindowsStandalone64"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
