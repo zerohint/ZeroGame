@@ -9,9 +9,13 @@
         "Editor",
         "iOS",
         "LinuxStandalone64",
+        "LinuxStandalone64Server",
+        "CloudRendering",
+        "macOSStandalone",
+        "macOSStandaloneServer",
         "WebGL",
         "WindowsStandalone32",
-		"WindowsStandalone64"
+        "WindowsStandalone64"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
