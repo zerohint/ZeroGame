@@ -15,4 +15,9 @@ public static class TaskUtils
     }
 
     public static async Task WaitWhile(Func<bool> predicate, int checkPeriod = 100) => await WaitUntil(() => !predicate(), checkPeriod);
+
+    public static async Task WaitForSeconds(float seconds)
+    {
+        await Task.Delay((int)(seconds * 1000));
+    }
 }

@@ -171,6 +171,44 @@ public static class EnumerableExtensions
 
 
     /// <summary>
+    /// Select a random element
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="sequence"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static T SelectRandom<T>(this IEnumerable<T> sequence)
+    {
+        ArgumentNullException.ThrowIfNull(sequence);
+
+        if (!sequence.Any())
+        {
+            throw new ArgumentException("The sequence is empty.");
+        }
+
+        //optimization for ICollection<T>
+        if (sequence is ICollection<T> col)
+        {
+            return col.ElementAt(random.Next(col.Count));
+        }
+
+        int count = 1;
+        T selected = default(T);
+
+        foreach (T element in sequence)
+        {
+            if (random.Next(count++) == 0)
+            {
+                //Select the current element with 1/count probability
+                selected = element;
+            }
+        }
+
+        return selected;
+    }
+
+
+    /// <summary>
     /// Select random number of elements from collection
     /// </summary>
     /// <typeparam name="T"></typeparam>
