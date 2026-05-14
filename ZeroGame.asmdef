@@ -9,7 +9,6 @@
         "Editor",
         "iOS",
         "LinuxStandalone64",
-        "LinuxStandalone64Server",
         "CloudRendering",
         "macOSStandalone",
         "macOSStandaloneServer",

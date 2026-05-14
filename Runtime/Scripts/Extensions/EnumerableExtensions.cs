@@ -179,13 +179,16 @@ public static class EnumerableExtensions
     /// <exception cref="ArgumentException"></exception>
     public static T SelectRandom<T>(this IEnumerable<T> sequence)
     {
-        ArgumentNullException.ThrowIfNull(sequence);
+        // ArgumentNullException.ThrowIfNull(sequence);
+        if (sequence == null)
+            new ArgumentNullException("Sequence is null");
 
         if (!sequence.Any())
         {
             throw new ArgumentException("The sequence is empty.");
         }
 
+        Random random = new(); // DEBUG: right approach?
         //optimization for ICollection<T>
         if (sequence is ICollection<T> col)
         {
