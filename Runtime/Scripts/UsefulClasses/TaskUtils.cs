@@ -20,4 +20,12 @@ public static class TaskUtils
     {
         await Task.Delay((int)(seconds * 1000));
     }
+
+    public static async Task ContinueWithMainThread<TResult>(
+        this Task<TResult> task,
+        Action<TResult> continuation)
+    {
+        var result = await task;
+        continuation(result);
+    }
 }

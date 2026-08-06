@@ -12,6 +12,11 @@ public class ConfirmPanel : MonoSingleton<ConfirmPanel>
     [SerializeField] private Button okButton;
     [SerializeField] private Button cancelButton;
 
+
+    /// <summary>
+    /// Open confirm panel 
+    /// </summary>
+    /// <param name="context"></param>
     public static void Confirm(Context context)
     {
         Instance.titleText.text = context.Title ?? "Onayla";

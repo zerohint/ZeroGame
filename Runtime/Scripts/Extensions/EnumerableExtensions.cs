@@ -1,10 +1,37 @@
 using System;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 public static class EnumerableExtensions
 {
+    /// <summary>
+    /// Get next index, 0 if its end
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public static int GetNextIndex_Circular(this ICollection list, int index)
+    {
+        return (index + 1) % list.Count;
+    }
+
+
+
+    /// <summary>
+    /// Get previous index, last index if its begining
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public static int GetPrevIndex_Circular(this ICollection list, int index)
+    {
+        return (list.Count + index - 1) % list.Count;
+    }
+
+
+
     /// <summary>
     /// Get row of 2D matrix
     /// </summary>
@@ -38,6 +65,8 @@ public static class EnumerableExtensions
 
         return result;
     }
+
+
 
     /// <summary>
     /// Get column of 2D matrix
@@ -73,6 +102,8 @@ public static class EnumerableExtensions
 
         return result;
     }
+
+
 
     /// <summary>
     /// Get maximum element by comparing selectors
@@ -110,6 +141,8 @@ public static class EnumerableExtensions
 
         return maxElement;
     }
+
+
 
     /// <summary>
     /// Get minimum element by comparing selectors
@@ -170,6 +203,7 @@ public static class EnumerableExtensions
     }
 
 
+
     /// <summary>
     /// Select a random element
     /// </summary>
@@ -211,6 +245,7 @@ public static class EnumerableExtensions
     }
 
 
+
     /// <summary>
     /// Select random number of elements from collection
     /// </summary>
@@ -226,6 +261,8 @@ public static class EnumerableExtensions
             yield return shuffledArray[i];
         }
     }
+
+
 
     /// <summary>
     /// Create list from collection until stopValue
@@ -251,6 +288,8 @@ public static class EnumerableExtensions
 
         return result;
     }
+
+
 
     /// <summary>
     /// Get sub array
