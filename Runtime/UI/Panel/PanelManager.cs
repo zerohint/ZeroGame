@@ -94,6 +94,16 @@ public partial class PanelManager : SingletonSC<PanelManager>
 
 
     /// <summary>
+    /// Close all panels
+    /// </summary>
+    public void ClosePanels()
+    {
+        foreach (var s in stack)
+            ClosePanel(s);
+    }
+
+
+    /// <summary>
     /// Load the wanted panel if needed, then stack it
     /// </summary>
     private async Task<Panel> OpenPanel(PanelData panelData)
@@ -180,7 +190,7 @@ public partial class PanelManager : SingletonSC<PanelManager>
 
 
     /// <summary>
-    /// Panels live under a runtime canvas, a scene load destroys them behind our back
+    /// Check is panels exists at stack
     /// </summary>
     private void PruneStack()
     {
