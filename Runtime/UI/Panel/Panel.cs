@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Scene dependent panel base
 /// </summary>
-public class Panel : MonoBehaviour
+public abstract class Panel : MonoBehaviour
 {
     public event Action<Panel> OnOpened;
     public event Action<Panel> OnClosed;
@@ -15,27 +15,42 @@ public class Panel : MonoBehaviour
     /// </summary>
     public bool IsOpen => content.activeSelf;
 
-    public PanelID PanelID => (PanelID) panelId;
-
-    [field: SerializeField] private string panelId;
 
     [SerializeField] private GameObject content;
 
-    /// <summary>
-    /// Open panel shortcut for serialized fields
-    /// </summary>
-    /// <param name="panelId"></param>
-    public void OpenPanel(string panelId) => PanelManager.Instance.OpenPanel((PanelID)panelId);
 
-    public virtual void Open()
+
+    /// <summary>
+    /// Open panel by class name shortcut for used by serialized fields
+    /// </summary>
+    /// <param name="panelClassName"></param>
+    public void OpenPanel(string panelClassName) => _ = PanelManager.Instance.OpenPanel(panelClassName);
+
+
+    /// <summary>
+    /// Close this panel and reveal what is under it.
+    /// Navigation is owned by <see cref="PanelManager"/>, don't call <see cref="Hide"/> to close a panel
+    /// </summary>
+    public void Close() => PanelManager.Instance.ClosePanel(this);
+
+
+    /// <summary>
+    /// Called by <see cref="PanelManager"/> only
+    /// </summary>
+    public virtual void Show()
     {
+        if (content.activeSelf) return;
+
         content.SetActive(true);
         OnOpened?.Invoke(this);
     }
 
-    public virtual void Close()
+    /// <summary>
+    /// Called by <see cref="PanelManager"/> only
+    /// </summary>
+    public virtual void Hide()
     {
-        if (PanelID == PanelNames.HOME) return;
+        if (!content.activeSelf) return;
 
         content.SetActive(false);
         OnClosed?.Invoke(this);
@@ -60,27 +75,3 @@ public class Panel : MonoBehaviour
 
     }
 }
-
-
-
-// public enum PanelType
-// {
-//     // Home Scene Panels
-//     Home = 0,
-//     Ban = 1,
-//     Leaderboard = 3,
-//     Friends = 4,
-//     BattlePass = 5,
-//     SpinWheel = 6,
-//     Store = 10,
-//     Chat = 14,
-//     Soon = 16,
-//     Pairing = 2,
-//     Lobby = 7,
-//     Seasons = 8,
-//     Royalty = 11,
-//     VoiceLobby = 13,
-//     CongratsPanel = 15,
-
-//     // Game Scene Panels
-// }
