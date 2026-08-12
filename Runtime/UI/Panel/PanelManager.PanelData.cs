@@ -10,7 +10,7 @@ public partial class PanelManager
     private class PanelData
     {
         /// <summary>
-        /// Name to show on inspector panel
+        /// Name to show on inspector panel and log
         /// </summary>
         [SerializeField, HideInInspector] private string displayName = "Undefined";
 
@@ -29,6 +29,7 @@ public partial class PanelManager
         [NonSerialized] private Task<Panel> loadTask;
 
         public bool IsInstanced => instanced.IsExists();
+        public bool IsLoading => loadTask != null;
 
 
         /// <summary>
@@ -37,43 +38,52 @@ public partial class PanelManager
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public Task<Panel> Load(Transform parent)
+        public async Task<Panel> Load(Transform parent)
         {
             if (IsInstanced)
-                return Task.FromResult(instanced);
+                return instanced;
 
-            return loadTask ??= LoadInternal(parent);
-        }
+            if (loadTask != null)
+                return await loadTask;
 
+            var task = LoadInternal(parent);
+            loadTask = task;
 
-        /// <exception cref="Exception"></exception>
-        private async Task<Panel> LoadInternal(Transform parent)
-        {
             try
             {
-                if (!asyncHandle.IsValid())
-                    asyncHandle = panelAddressable.LoadAssetAsync();
-                await asyncHandle.Task;
-
-                if (asyncHandle.Status != AsyncOperationStatus.Succeeded)
-                {
-                    Debug.LogError($"[PanelData.Load] Failed to load panel: " + ToString());
-                    Release();
-                    return null;
-                }
-
-                var go = UnityEngine.Object.Instantiate(asyncHandle.Result, parent);
-                if (!go.TryGetComponent(out instanced))
-                {
-                    UnityEngine.Object.Destroy(go);
-                    throw new Exception($"[PanelData.Load] No {nameof(Panel)} component on prefab: " + ToString());
-                }
-                return instanced;
+                return await task;
             }
             finally
             {
-                loadTask = null;
+                if (ReferenceEquals(loadTask, task))
+                    loadTask = null;
             }
+        }
+
+        private async Task<Panel> LoadInternal(Transform parent)
+        {
+            if (!asyncHandle.IsValid())
+                asyncHandle = panelAddressable.LoadAssetAsync();
+
+            await asyncHandle.Task;
+
+
+            if (asyncHandle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.LogError($"[PanelData.Load] Failed to load panel: " + ToString());
+                Unload();
+                return null;
+            }
+
+            var go = Instantiate(asyncHandle.Result, parent);
+
+            if (!go.TryGetComponent(out instanced))
+            {
+                Destroy(go);
+                throw new Exception($"[PanelData.LoadInternal] No {nameof(Panel)} component on prefab: " + displayName);
+            }
+
+            return instanced;
         }
 
 
@@ -81,17 +91,18 @@ public partial class PanelManager
         /// On game being destroyed
         /// In editor, game closed. I'm not sure needed on build
         /// </summary>
-        public void OnDestroy() => Release();
+        public void OnDestroy() => Unload();
 
 
         /// <summary>
-        /// Back to the never-loaded state.
-        /// Matters on a ScriptableObject, it outlives play mode in the editor
+        /// Destroy the instance and release the addressable, back to the never-loaded state.
+        /// Reopening pays the full load cost again.
+        /// Also matters on a ScriptableObject, it outlives play mode in the editor
         /// </summary>
-        private void Release()
+        public void Unload()
         {
             if (instanced.IsExists())
-                UnityEngine.Object.Destroy(instanced.gameObject);
+                Destroy(instanced.gameObject);
             instanced = null;
             loadTask = null;
 

@@ -7,9 +7,29 @@ using UnityEngine;
 /// </summary>
 public abstract class Popup : Panel
 {
-    public override void Show()
+    public TweenType OpenAnimation;
+    public TweenType CloseAnimation;
+
+    public override void OnShow()
     {
-        base.Show();
-        PopupFadeIn(transform);
+        base.OnShow();
+
+        content.transform.localScale = Vector3.one;
+        // popup.localScale = Vector3.one * 0.6f;
+        // popup.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutElastic);
+    }
+
+
+    public override void OnHide()
+    {
+        base.OnHide();
+
+    }
+
+    public enum TweenType
+    {
+        None,
+        Scale,
+        Up
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 /// <summary>
@@ -18,6 +19,9 @@ public partial class PanelManager : SingletonSC<PanelManager>
 
     [SerializeField] private Canvas canvasPrefab;
     [SerializeField] private PanelData[] panels;
+    [Header("Advanced")]
+    [SerializeField, Tooltip("Adds click sound to all Button's if assigned")] private AudioClip clickSound;
+
 
     /// <summary>
     /// Navigation stack, bottom is the root panel and never closed, top is the last opened one.
@@ -26,6 +30,7 @@ public partial class PanelManager : SingletonSC<PanelManager>
     private readonly List<Panel> stack = new();
     private Panel CurrPanel => stack.Count > 0 ? stack[^1] : null;
     private Canvas runtimeCanvas;
+    private AudioSource uiAudioSource;
 
     private readonly Dictionary<Type, PanelData> panelCache = new();
 
@@ -42,7 +47,7 @@ public partial class PanelManager : SingletonSC<PanelManager>
         if (panelData == null)
             throw new KeyNotFoundException($"[PanelManager.OpenPanel] Panel {typeName} not found in panels");
 
-        return OpenPanel(panelData);
+        return OpenPanelInternal(panelData);
     }
 
 
@@ -57,23 +62,26 @@ public partial class PanelManager : SingletonSC<PanelManager>
         if (!panelCache.TryGetValue(typeof(T), out var panelData))
             throw new KeyNotFoundException($"[PanelManager.OpenPanel] Panel {typeof(T)} not found in panels");
 
-        return await OpenPanel(panelData) as T;
+        var panel = await OpenPanelInternal(panelData);
+
+        if (panel is not T typedPanel)
+            throw new InvalidCastException(
+                $"[PanelManager.OpenPanel] Expected {typeof(T)}, got {(panel == null ? "null" : panel.GetType())}");
+
+        return typedPanel;
     }
+
 
 
     /// <summary>
     /// Close the topmost panel and reveal what is under it.
-    /// The root panel is never closed, in the menu scene closing back down lands on home
+    /// TODO: connect android/ios back and esc
     /// </summary>
-    /// <returns>False when there is nothing left to close</returns>
-    public bool Back()
+    public void Back()
     {
         PruneStack();
-        if (stack.Count <= 1) return false;
-
         PopFrom(stack.Count - 1);
         RefreshVisibility();
-        return true;
     }
 
 
@@ -85,7 +93,7 @@ public partial class PanelManager : SingletonSC<PanelManager>
     {
         PruneStack();
         var index = stack.IndexOf(panel);
-        if (index <= 0) return false;
+        if (index < 0) return false;
 
         PopFrom(index);
         RefreshVisibility();
@@ -96,38 +104,103 @@ public partial class PanelManager : SingletonSC<PanelManager>
     /// <summary>
     /// Close all panels
     /// </summary>
-    public void ClosePanels()
+    public void ClosePanels() => PopFrom(0);
+
+
+    /// <summary>
+    /// Close the panel, destroy its instance and release its addressable.
+    /// For panels that won't be needed for a long time, reopening pays the full load cost again
+    /// </summary>
+    /// <typeparam name="T">Panel class, must be registered in panels</typeparam>
+    /// <returns>False when the panel is not in memory anyway</returns>
+    public bool FullClose<T>() where T : Panel
     {
-        foreach (var s in stack)
-            ClosePanel(s);
+        CachePanelsDictionary();
+
+        if (!panelCache.TryGetValue(typeof(T), out var panelData))
+            throw new KeyNotFoundException($"[PanelManager.FullClose] Panel {typeof(T)} not found in panels");
+
+        return FullClose(panelData);
+    }
+
+
+    /// <inheritdoc cref="FullClose{T}"/>
+    public bool FullClose(Panel panel)
+    {
+        CachePanelsDictionary();
+
+        if (!panel.IsExists() || !panelCache.TryGetValue(panel.GetType(), out var panelData))
+            throw new KeyNotFoundException($"[PanelManager.FullClose] Panel {panel} not found in panels");
+
+        return FullClose(panelData);
+    }
+
+
+    private bool FullClose(PanelData panelData)
+    {
+        if (panelData.IsLoading)
+        {
+            Debug.LogError($"[PanelManager.FullClose] Can't unload while loading: {panelData}");
+            return false;
+        }
+
+        if (!panelData.IsInstanced)
+            return false;
+
+        ClosePanel(panelData.instanced); // no-op when it's not stacked, already closed
+        panelData.Unload();
+        return true;
     }
 
 
     /// <summary>
     /// Load the wanted panel if needed, then stack it
     /// </summary>
-    private async Task<Panel> OpenPanel(PanelData panelData)
+    private async Task<Panel> OpenPanelInternal(PanelData panelData)
     {
         if (panelData.IsInstanced && CurrPanel == panelData.instanced)
+        {
             return CurrPanel;
+        }
 
         if (!panelData.IsInstanced)
         {
             if (!runtimeCanvas.IsExists())
             {
                 runtimeCanvas = Instantiate(canvasPrefab);
+                uiAudioSource = runtimeCanvas.GetComponent<AudioSource>();
                 DontDestroyOnLoad(runtimeCanvas);
             }
+
             Loadings.Instance.Show(runtimeCanvas.transform);
             await panelData.Load(runtimeCanvas.transform);
             Loadings.Instance.Hide(runtimeCanvas.transform);
 
-            if (!panelData.IsInstanced) // failed, already logged by PanelData
+            if (!panelData.IsInstanced)
+            {
+                Debug.LogError($"LOAD RETURNED BUT NO INSTANCE {panelData.PanelType}");
                 return null;
+            }
+
+            // Delay for later instantiations. TODO: not a good way to handle
+            Delayer.Delay(1, () => ApplyButtonSounds(panelData.instanced.transform));
         }
 
         Push(panelData.instanced);
         return panelData.instanced;
+    }
+
+
+
+    /// <summary>
+    /// Add click sound under all Buttons under transform
+    /// </summary>
+    /// <param name="t"></param>
+    public void ApplyButtonSounds(Transform t)
+    {
+        if (clickSound == null) return;
+        foreach (var btn in t.GetComponentsInChildren<Button>())
+            btn.onClick.AddListener(() => uiAudioSource.PlayOneShot(clickSound));
     }
 
 
@@ -153,14 +226,24 @@ public partial class PanelManager : SingletonSC<PanelManager>
 
 
     /// <summary>
-    /// Hide and drop everything from the given index upwards
+    /// Hide and drop everything from the given index upwards.
+    /// A <see cref="Panel.HardClose"/> panel is unloaded straight through <see cref="PanelData"/>,
+    /// not via <see cref="FullClose(PanelData)"/>, to avoid Hide/ClosePanel calling back into this
     /// </summary>
     private void PopFrom(int index)
     {
+        if (index < 0) return;
+
+        CachePanelsDictionary();
+
         for (int i = stack.Count - 1; i >= index; i--)
         {
-            stack[i].Hide();
+            var panel = stack[i];
             stack.RemoveAt(i);
+            panel.Hide();
+
+            if (panel.HardClose && panelCache.TryGetValue(panel.GetType(), out var panelData))
+                panelData.Unload();
         }
     }
 
@@ -187,6 +270,7 @@ public partial class PanelManager : SingletonSC<PanelManager>
                 stack[i].Hide();
         }
     }
+
 
 
     /// <summary>
