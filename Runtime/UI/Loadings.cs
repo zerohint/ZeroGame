@@ -8,7 +8,20 @@ public class Loadings : MonoSingleton<Loadings>
 {
     [SerializeField] private GameObject loadingPrefab;
 
-    private readonly Dictionary<Transform, GameObject> activeLoadings = new();
+    private readonly Dictionary<Transform, ActiveLoading> activeLoadings = new();
+
+    private readonly struct ActiveLoading
+    {
+        public readonly GameObject Instance;
+        /// <summary>Null when the loading prefab has no progress view on it</summary>
+        public readonly LoadingView View;
+
+        public ActiveLoading(GameObject instance)
+        {
+            Instance = instance;
+            View = instance.GetComponentInChildren<LoadingView>(true);
+        }
+    }
 
 
     /// <summary>
@@ -27,7 +40,31 @@ public class Loadings : MonoSingleton<Loadings>
 
         var loadingInstance = Instantiate(loadingPrefab, t);
         //panelLoading.transform.SetAsLastSibling();
-        activeLoadings[t] = loadingInstance;
+        activeLoadings[t] = new ActiveLoading(loadingInstance);
+    }
+
+
+    /// <summary>
+    /// Update the progress bar of an already shown loading screen. Optional: a loading screen
+    /// keeps its progress view hidden until this is called, and a loading prefab without a
+    /// <see cref="LoadingView"/> simply ignores it.
+    /// </summary>
+    /// <param name="progress">0-1 value</param>
+    /// <param name="t">The transform the loading screen was shown on (fullscreen if null)</param>
+    public void SetProgress(float progress, Transform t = null)
+    {
+        if (t == null) t = transform;
+
+        if (!activeLoadings.TryGetValue(t, out var active))
+        {
+            Debug.LogWarning($"No active loading found for this transform ({t.gameObject.name}), cannot set progress.", t);
+            return;
+        }
+
+        if (!active.View.IsExists())
+            return;
+
+        active.View.SetProgress(progress);
     }
 
 
@@ -39,9 +76,9 @@ public class Loadings : MonoSingleton<Loadings>
     {
         if (t == null) t = transform;
 
-        if (activeLoadings.TryGetValue(t, out var loadingInstance))
+        if (activeLoadings.TryGetValue(t, out var active))
         {
-            Destroy(loadingInstance);
+            Destroy(active.Instance);
             activeLoadings.Remove(t);
         }
         else
@@ -50,6 +87,3 @@ public class Loadings : MonoSingleton<Loadings>
         }
     }
 }
-
-
-

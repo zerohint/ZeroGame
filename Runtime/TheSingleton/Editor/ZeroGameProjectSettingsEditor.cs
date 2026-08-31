@@ -32,8 +32,20 @@ public class ZeroGameProjectSettingsEditor : EditorWindow
                 {
                     EditorUtility.SetDirty(theSingleton);
                 }
+
+                EditorGUILayout.Space(12);
+                ZeroGame.Editor.WebGLDeployGUI.Draw();
+
+                EditorGUILayout.Space(4);
+                if (EditorGUILayout.LinkButton("Open in Player > WebGL Deploy"))
+                {
+                    ZeroGame.Editor.WebGLDeployGUI.OpenSettingsPage();
+                }
             },
-            keywords = new System.Collections.Generic.HashSet<string>(new[] { "ZeroGame", "ZeroHint", "Settings" })
+            keywords = new System.Collections.Generic.HashSet<string>(new[]
+            {
+                "ZeroGame", "ZeroHint", "Settings", "WebGL", "FTP", "Deploy", "Publish"
+            })
         };
 
         return provider;
