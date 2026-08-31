@@ -5,6 +5,26 @@
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>{{{ PRODUCT_NAME }}}</title>
+	<script>
+		// Cache busting: always land on <same url>?v={{{ PRODUCT_VERSION }}}
+		// Toggle "Version Redirect" in Player Settings / Build Profile.
+		(function () {
+			var versionRedirect;
+			try {
+				versionRedirect = !!JSON.parse("{{{ VERSION_REDIRECT }}}");
+			} catch (e) {
+				versionRedirect = false;
+			}
+			if (!versionRedirect) return;
+
+			var version = "{{{ PRODUCT_VERSION }}}";
+			var url = new URL(window.location.href);
+			if (url.searchParams.get("v") === version) return;
+
+			url.searchParams.set("v", version);
+			window.location.replace(url.toString());
+		})();
+	</script>
 	<style>
 		html,
 

@@ -31,3 +31,16 @@ Header set Content-Encoding br
 Header set Content-Encoding gzip
 </FilesMatch>
 </IfModule>
+
+<IfModule mod_headers.c>
+# index.html must always be revalidated so a new build is picked up immediately.
+<FilesMatch "^index\.html$">
+Header set Cache-Control "no-cache"
+</FilesMatch>
+
+# Build output is named as hashes (Publishing Settings > Name Files As Hashes),
+# so every file name is content-addressed and can be cached forever.
+# Scoped to Build/ so unhashed StreamingAssets files are not frozen too.
+SetEnvIf Request_URI "/Build/" ZERO_IMMUTABLE=1
+Header set Cache-Control "public, max-age=31536000, immutable" env=ZERO_IMMUTABLE
+</IfModule>

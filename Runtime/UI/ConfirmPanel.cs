@@ -2,8 +2,9 @@
 using TMPro;
 using UnityEngine.UI;
 using System;
+using System.Threading.Tasks;
 
-public class ConfirmPanel : MonoSingleton<ConfirmPanel>
+public class ConfirmPanel : Panel
 {
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text messageText;
@@ -17,33 +18,38 @@ public class ConfirmPanel : MonoSingleton<ConfirmPanel>
     /// Open confirm panel 
     /// </summary>
     /// <param name="context"></param>
-    public static void Confirm(Context context)
+    public static async Task Confirm(Context context)
     {
-        Instance.titleText.text = context.Title ?? "Onayla";
-        Instance.messageText.text = context.Message ?? "Onaylıyor musunuz?";
-        Instance.okButtonText.text = context.OkButtonText ?? "Tamam";
-        Instance.cancelButtonText.text = context.CancelButtonText ?? "Vazgeç";
+        var panel = await PanelManager.Instance.OpenPanel<ConfirmPanel>();
 
-        Instance.okButton.onClick.RemoveAllListeners();
-        Instance.cancelButton.onClick.RemoveAllListeners();
-        Instance.okButton.onClick.AddListener(() => context.OnConfirm?.Invoke());
-        Instance.okButton.onClick.AddListener(() => Instance.ClosePanel());
+        panel.titleText.text = context.Title ?? "Onayla";
+        panel.messageText.text = context.Message ?? "Onaylıyor musunuz?";
+        panel.okButtonText.text = context.OkButtonText ?? "Tamam";
+        panel.cancelButtonText.text = context.CancelButtonText ?? "Vazgeç";
+
+        panel.okButton.onClick.RemoveAllListeners();
+        panel.cancelButton.onClick.RemoveAllListeners();
+        panel.okButton.onClick.AddListener(() => context.OnConfirm?.Invoke());
+        panel.okButton.onClick.AddListener(() => panel.ClosePanel());
         // Instance.okButton.onClick.AddListener(() => AudioManager.Instance.PlayUiSfx(UISoundType.Success));
-        Instance.cancelButton.onClick.AddListener(() => context.OnCancel?.Invoke());
+        panel.cancelButton.onClick.AddListener(() => context.OnCancel?.Invoke());
         // Instance.cancelButton.onClick.AddListener(() => AudioManager.Instance.PlayUiSfx(UISoundType.ClosePanel));
-        Instance.cancelButton.onClick.AddListener(() => Instance.ClosePanel());
-        Instance.OpenPanel();
+        panel.cancelButton.onClick.AddListener(() => panel.ClosePanel());
+        panel.OpenPanel();
     }
+
 
     public void OpenPanel()
     {
         // AudioManager.Instance.PlayUiSfx(UISoundType.OpenPopup);
-        Instance.gameObject.SetActive(true);
+        gameObject.SetActive(true);
     }
+
     public void ClosePanel()
     {
-        Instance.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
+
 
     public struct Context
     {
