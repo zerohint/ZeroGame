@@ -39,16 +39,15 @@ public class ConfirmPanel : Panel
     }
 
 
-    public void OpenPanel()
-    {
-        // AudioManager.Instance.PlayUiSfx(UISoundType.OpenPopup);
-        gameObject.SetActive(true);
-    }
+    /// <summary>
+    /// Kept for the buttons that call it. <see cref="PanelManager"/> has already stacked
+    /// the panel by the time <see cref="Confirm"/> gets here, so there is nothing to open -
+    /// it used to switch its own gameObject on and off, behind the manager's back, which
+    /// left a closed panel still sitting on the navigation stack
+    /// </summary>
+    public void OpenPanel() { }
 
-    public void ClosePanel()
-    {
-        gameObject.SetActive(false);
-    }
+    public void ClosePanel() => Close();
 
 
     public struct Context

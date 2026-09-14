@@ -32,6 +32,12 @@ public partial class PanelManager : SingletonSC<PanelManager>
     private Canvas runtimeCanvas;
     private AudioSource uiAudioSource;
 
+    /// <summary>
+    /// The shared dim on the canvas prefab, if it has one. Optional - a project that does not
+    /// dim behind its panels simply leaves it off the prefab
+    /// </summary>
+    private PanelDimm dimm;
+
     private readonly Dictionary<Type, PanelData> panelCache = new();
 
 
@@ -168,7 +174,11 @@ public partial class PanelManager : SingletonSC<PanelManager>
             if (!runtimeCanvas.IsExists())
             {
                 runtimeCanvas = Instantiate(canvasPrefab);
-                uiAudioSource = runtimeCanvas.GetComponent<AudioSource>();
+                // in children, not on the root: a world space canvas usually wants its click
+                // sound on a child placed where the sound should come from, not on the board
+                uiAudioSource = runtimeCanvas.GetComponentInChildren<AudioSource>(true);
+                // true: the dim is authored switched off, so an active-only search misses it
+                dimm = runtimeCanvas.GetComponentInChildren<PanelDimm>(true);
                 DontDestroyOnLoad(runtimeCanvas);
             }
 
@@ -182,8 +192,11 @@ public partial class PanelManager : SingletonSC<PanelManager>
                 return null;
             }
 
-            // Delay for later instantiations. TODO: not a good way to handle
-            Delayer.Delay(1, () => ApplyButtonSounds(panelData.instanced.transform));
+            // straight away: the panel is fully instantiated by the time Load returns, so
+            // there is nothing to wait for. It used to be put off by a second, which is a
+            // second of a panel whose buttons are silent - and on a build with no
+            // TheSingleton to run the delay on, silent for good
+            ApplyButtonSounds(panelData.instanced.transform);
         }
 
         Push(panelData.instanced);
@@ -193,14 +206,61 @@ public partial class PanelManager : SingletonSC<PanelManager>
 
 
     /// <summary>
-    /// Add click sound under all Buttons under transform
+    /// The click a button makes. Every <see cref="Button"/> is wired to this by
+    /// <see cref="ApplyButtonSounds"/>, and it is public for the presses that are not a
+    /// Button at all - a controller shortcut opening a panel, a gesture the patient needs
+    /// an acknowledgement for - so the whole UI answers with one sound instead of each
+    /// caller carrying a clip of its own.
+    ///
+    /// Quiet, not an error, when no click sound is assigned: this is feedback, and a
+    /// project that wants a silent UI says so by leaving the clip empty
     /// </summary>
-    /// <param name="t"></param>
-    public void ApplyButtonSounds(Transform t)
+    public void PlayClick()
     {
         if (clickSound == null) return;
-        foreach (var btn in t.GetComponentsInChildren<Button>())
-            btn.onClick.AddListener(() => uiAudioSource.PlayOneShot(clickSound));
+
+        // the canvas is only instantiated when the first panel opens, so a click asked for
+        // before that has nothing to play through. Falling back to a one-shot at the
+        // listener keeps those callers audible rather than silently doing nothing
+        if (uiAudioSource.IsExists())
+            uiAudioSource.PlayOneShot(clickSound);
+        else
+            AudioSource.PlayClipAtPoint(clickSound, ListenerPoint());
+    }
+
+
+    private static Vector3 ListenerPoint()
+    {
+        var listener = FindFirstObjectByType<AudioListener>();
+        if (listener.IsExists()) return listener.transform.position;
+
+        var camera = Camera.main;
+        return camera.IsExists() ? camera.transform.position : Vector3.zero;
+    }
+
+
+    /// <summary>
+    /// Make every <see cref="Button"/> under <paramref name="t"/> click.
+    ///
+    /// This is the only place a UI click sound is wired up - no button and no button script
+    /// carries a clip of its own - so one clip in one place is the whole UI's voice. Call it
+    /// on anything made of Buttons that <see cref="PanelManager"/> did not load itself: a
+    /// menu standing in a scene, a list whose rows are instantiated after the panel was.
+    ///
+    /// Safe to call twice on the same buttons - the listener is taken off before it is put
+    /// on, so a pooled row that is re-registered clicks once rather than once per rebuild
+    /// </summary>
+    public void ApplyButtonSounds(Transform t)
+    {
+        if (clickSound == null || !t.IsExists()) return;
+
+        // true: a panel's content is very often still switched off when this runs, and an
+        // active-only search would leave every button on it silent
+        foreach (var btn in t.GetComponentsInChildren<Button>(true))
+        {
+            btn.onClick.RemoveListener(PlayClick);
+            btn.onClick.AddListener(PlayClick);
+        }
     }
 
 
@@ -269,6 +329,37 @@ public partial class PanelManager : SingletonSC<PanelManager>
             else
                 stack[i].Hide();
         }
+
+        RefreshDimm(topScreen);
+    }
+
+
+    /// <summary>
+    /// Put the shared dim just under the lowest visible panel that asked for it, and take
+    /// everything below that out of reach.
+    ///
+    /// The panels under a dim are still on screen - a popup does not hide what it sits on -
+    /// so they cannot be turned off, but they must not be operable either: a control the
+    /// user can still reach through a dim is one they will hit while aiming at the popup
+    /// </summary>
+    private void RefreshDimm(int topScreen)
+    {
+        var dimFrom = -1;
+        for (int i = topScreen; i < stack.Count; i++)
+        {
+            if (!stack[i].DimBehind) continue;
+
+            dimFrom = i;
+            break;
+        }
+
+        for (int i = 0; i < stack.Count; i++)
+            stack[i].SetInteractable(dimFrom < 0 || i >= dimFrom);
+
+        if (!dimm.IsExists()) return;
+
+        if (dimFrom < 0) dimm.Hide();
+        else dimm.ShowUnder(stack[dimFrom].transform);
     }
 
 
