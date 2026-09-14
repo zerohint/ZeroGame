@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -148,6 +149,107 @@ namespace ZeroGame.Editor
             Debug.Log(
                 $"[ZeroGame] Deployed {uploaded} files to " +
                 $"{settings.Host}:{settings.Port}{settings.RemoteDirectory}");
+
+            if (settings.PruneRemoteBuildFolder)
+                PruneRemoteBuildFolder(client, files);
+        }
+
+        /// <summary>
+        /// Deletes the player files of previous deploys from the remote "Build" folder.
+        ///
+        /// With Name Files As Hashes on, every build writes new file names, so without this the
+        /// folder grows by ~18 MB per deploy and nothing ever overwrites the old set. Only files
+        /// that look like Unity player output are touched - anything else in Build/ is left alone,
+        /// and this runs after a fully successful upload so a half-uploaded build never prunes.
+        /// </summary>
+        private static void PruneRemoteBuildFolder(
+            WebGLFtpClient client,
+            List<(string local, string remote)> uploadedFiles)
+        {
+            const string BUILD_FOLDER = "Build";
+
+            var keep = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var (_, remote) in uploadedFiles)
+            {
+                if (remote.StartsWith(BUILD_FOLDER + "/", StringComparison.Ordinal) &&
+                    remote.IndexOf('/', BUILD_FOLDER.Length + 1) < 0)
+                {
+                    keep.Add(remote.Substring(BUILD_FOLDER.Length + 1));
+                }
+            }
+
+            if (keep.Count == 0)
+            {
+                Debug.LogWarning(
+                    "[ZeroGame] Skipped remote cleanup: this deploy uploaded no files into " +
+                    $"'{BUILD_FOLDER}/', so there is nothing to compare the server against.");
+                return;
+            }
+
+            List<string> remoteNames;
+            try
+            {
+                remoteNames = client.ListFileNames(BUILD_FOLDER);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[ZeroGame] Remote cleanup skipped, could not list '{BUILD_FOLDER}/': {exception.Message}. " +
+                    "The deploy itself succeeded.");
+                return;
+            }
+
+            var deleted = 0;
+            var failed = 0;
+
+            foreach (var name in remoteNames)
+            {
+                if (keep.Contains(name) || !IsPlayerFile(name)) continue;
+
+                try
+                {
+                    client.DeleteFile($"{BUILD_FOLDER}/{name}");
+                    deleted++;
+                }
+                catch (Exception exception)
+                {
+                    failed++;
+                    Debug.LogWarning($"[ZeroGame] Could not delete stale '{BUILD_FOLDER}/{name}': {exception.Message}");
+                }
+            }
+
+            if (failed > 0)
+            {
+                Debug.LogWarning(
+                    $"[ZeroGame] Removed {deleted} stale file(s) from '{BUILD_FOLDER}/', {failed} could not be deleted.");
+                return;
+            }
+
+            Debug.Log(
+                deleted == 0
+                    ? $"[ZeroGame] Remote '{BUILD_FOLDER}/' had no stale files."
+                    : $"[ZeroGame] Removed {deleted} stale file(s) from the remote '{BUILD_FOLDER}/'.");
+        }
+
+        /// <summary>
+        /// True for Unity WebGL player output ("&lt;name&gt;.wasm.br", ".data", ".framework.js.gz",
+        /// ".loader.js", ".symbols.json"). Keeps the cleanup away from anything hand-placed.
+        /// </summary>
+        private static bool IsPlayerFile(string fileName)
+        {
+            var name = fileName;
+
+            if (name.EndsWith(".br", StringComparison.OrdinalIgnoreCase) ||
+                name.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+            {
+                name = name.Substring(0, name.Length - 3);
+            }
+
+            return name.EndsWith(".wasm", StringComparison.OrdinalIgnoreCase)
+                   || name.EndsWith(".data", StringComparison.OrdinalIgnoreCase)
+                   || name.EndsWith(".framework.js", StringComparison.OrdinalIgnoreCase)
+                   || name.EndsWith(".loader.js", StringComparison.OrdinalIgnoreCase)
+                   || name.EndsWith(".symbols.json", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>Test Connection button: lists the remote directory and reports the result.</summary>

@@ -6,28 +6,36 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /index.html [L]
 
 <IfModule mod_mime.c>
-AddEncoding br .br
-AddEncoding gzip .gz
-
 AddType application/javascript .js
-AddType application/javascript .js.br
-AddType application/javascript .js.gz
-
 AddType application/wasm .wasm
-AddType application/wasm .wasm.br
-AddType application/wasm .wasm.gz
-
 AddType application/octet-stream .data
-AddType application/octet-stream .data.br
-AddType application/octet-stream .data.gz
 </IfModule>
 
+# Unity's compressed player files are named "<hash>.wasm.br" etc. Apache must report
+# the type of the file INSIDE the container (.wasm) plus the encoding (br).
+#
+# Do NOT use "AddEncoding br .br" here as well: mod_mime stores the encoding outside
+# the response header table, so the "Header set" below does not replace it - Apache
+# then sends "Content-Encoding: br" twice, the browser tries to brotli-decode the
+# stream twice, and the loader reports "Unable to load file Build/<hash>.wasm.br".
+<FilesMatch "\.js\.(br|gz)$">
+ForceType application/javascript
+</FilesMatch>
+
+<FilesMatch "\.wasm\.(br|gz)$">
+ForceType application/wasm
+</FilesMatch>
+
+<FilesMatch "\.data\.(br|gz)$">
+ForceType application/octet-stream
+</FilesMatch>
+
 <IfModule mod_headers.c>
-<FilesMatch "\.(js|wasm|data)\.br$">
+<FilesMatch "\.(js|wasm|data|symbols\.json)\.br$">
 Header set Content-Encoding br
 </FilesMatch>
 
-<FilesMatch "\.(js|wasm|data)\.gz$">
+<FilesMatch "\.(js|wasm|data|symbols\.json)\.gz$">
 Header set Content-Encoding gzip
 </FilesMatch>
 </IfModule>

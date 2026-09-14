@@ -25,6 +25,7 @@ namespace ZeroGame.Editor
         [SerializeField] private string buildPath = "Build/WebGL";
         [SerializeField] private bool useFtps;
         [SerializeField] private bool passiveMode = true;
+        [SerializeField] private bool pruneRemoteBuildFolder = true;
 
         private static WebGLDeploySettings instance;
 
@@ -34,6 +35,17 @@ namespace ZeroGame.Editor
         internal string RemoteDirectory { get => remoteDirectory; set => remoteDirectory = value; }
         internal bool UseFtps { get => useFtps; set => useFtps = value; }
         internal bool PassiveMode { get => passiveMode; set => passiveMode = value; }
+
+        /// <summary>
+        /// After a successful upload, delete the player files of previous deploys from the
+        /// remote Build/ folder. Hashed file names are never overwritten, so without this the
+        /// server keeps every build ever deployed.
+        /// </summary>
+        internal bool PruneRemoteBuildFolder
+        {
+            get => pruneRemoteBuildFolder;
+            set => pruneRemoteBuildFolder = value;
+        }
 
         /// <summary>Where BuildPipeline writes the player. Relative paths resolve against the project root.</summary>
         internal string BuildPath { get => buildPath; set => buildPath = value; }

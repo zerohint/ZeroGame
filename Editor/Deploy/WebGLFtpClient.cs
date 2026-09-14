@@ -71,6 +71,40 @@ namespace ZeroGame.Editor
         }
 
         /// <summary>
+        /// File names (no paths) directly inside <paramref name="remoteRelativeDirectory"/>.
+        /// An empty list means "directory is empty"; a missing directory throws like everything else.
+        /// </summary>
+        internal List<string> ListFileNames(string remoteRelativeDirectory)
+        {
+            var names = new List<string>();
+
+            var request = CreateRequest(remoteRelativeDirectory, WebRequestMethods.Ftp.ListDirectory);
+            using var response = (FtpWebResponse)request.GetResponse();
+            using var reader = new StreamReader(response.GetResponseStream());
+
+            while (reader.ReadLine() is { } line)
+            {
+                // NLST answers with bare names on some servers and full paths on others.
+                var name = line.Trim().TrimEnd('\r');
+                var lastSlash = name.LastIndexOf('/');
+                if (lastSlash >= 0) name = name.Substring(lastSlash + 1);
+
+                if (name.Length == 0 || name == "." || name == "..") continue;
+
+                names.Add(name);
+            }
+
+            return names;
+        }
+
+        /// <summary>Deletes one remote file. Throws if the server refuses.</summary>
+        internal void DeleteFile(string remoteRelativePath)
+        {
+            var request = CreateRequest(remoteRelativePath, WebRequestMethods.Ftp.DeleteFile);
+            using var response = (FtpWebResponse)request.GetResponse();
+        }
+
+        /// <summary>
         /// Creates every segment of a relative remote directory path, ignoring "already exists".
         /// </summary>
         private void EnsureDirectory(string remoteRelativeDirectory)

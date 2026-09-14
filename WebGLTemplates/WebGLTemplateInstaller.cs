@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.PackageManager;
@@ -58,17 +59,53 @@ namespace ZeroGame.Editor
                 if (overwrite && AssetDatabase.IsValidFolder(destination))
                     AssetDatabase.DeleteAsset(destination);
 
-                if (AssetDatabase.IsValidFolder(destination))
-                    continue;
-
-                if (!AssetDatabase.CopyAsset(source, destination))
+                if (!AssetDatabase.IsValidFolder(destination) &&
+                    !AssetDatabase.CopyAsset(source, destination))
+                {
                     Debug.LogError($"Template kopyalanamadı: {source}");
+                    continue;
+                }
+
+                // Runs for an existing folder too, so an older install still picks up
+                // .htaccess changes shipped with the package.
+                CopyHiddenFiles(package, templateName, destination);
             }
 
             EnableNameFilesAsHashes();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        /// <summary>
+        /// Copies the template's dot-files (".htaccess") with plain file IO.
+        ///
+        /// AssetDatabase treats a leading dot as "hidden" and skips those files, so a template
+        /// copied through CopyAsset alone arrives without its .htaccess - and the build then has
+        /// no Content-Encoding rules, which makes every compressed .br file fail to load in the
+        /// browser. Unity's own template-to-build copy does include them, so only this step is missing.
+        /// </summary>
+        private static void CopyHiddenFiles(
+            UnityEditor.PackageManager.PackageInfo package,
+            string templateName,
+            string destinationAssetPath)
+        {
+            var sourceDirectory = Path.Combine(package.resolvedPath, "WebGLTemplates", templateName);
+            var destinationDirectory = Path.GetFullPath(destinationAssetPath);
+
+            if (!Directory.Exists(sourceDirectory))
+            {
+                Debug.LogError($"[ZeroGame] Template source folder is missing: {sourceDirectory}");
+                return;
+            }
+
+            foreach (var file in Directory.GetFiles(sourceDirectory, ".*", SearchOption.TopDirectoryOnly))
+            {
+                var name = Path.GetFileName(file);
+                if (name == ".DS_Store") continue;
+
+                File.Copy(file, Path.Combine(destinationDirectory, name), true);
+            }
         }
 
         /// <summary>

@@ -96,6 +96,13 @@ namespace ZeroGame.Editor
                 new GUIContent("Passive Mode", "Leave on unless the server requires active FTP."),
                 settings.PassiveMode);
 
+            settings.PruneRemoteBuildFolder = EditorGUILayout.Toggle(
+                new GUIContent(
+                    "Clean Remote Build",
+                    "After a successful upload, delete player files of older deploys from the remote " +
+                    "Build/ folder. File names are content hashes, so old builds are never overwritten."),
+                settings.PruneRemoteBuildFolder);
+
             EditorGUILayout.Space();
 
             DrawBuildPathField(settings);
